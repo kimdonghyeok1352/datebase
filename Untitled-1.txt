@@ -1,0 +1,322 @@
+desc 테이블 이름 : 테이블 정보
+distinct : 중복제거
+select from where 조건
+select * from book where price between 10000 and 20000
+between a and b 사이
+in~ 중에
+like ~와 같은
+select * from book where bookname like '_구%':
+_:1개의 문자와 일치
+%:0개이상의 문자열과 일치
+
+별칭부여하기 (as)
+select stu_no as id,stu_name as name from student;
+       stu_no를 id로 출력
+별칭은 기본값이 대문자
+인용부호("")사용ㅎ아면  소문자도 사용가능
+
+연결연산자 || :
+select stu_dept || stu_name as 학과서명 from student;
+->학과 ||(연결연산자) 이름(학과서명) 출력
+
+select stu_name,stu_dept from student  where  stu_dept='컴퓨터정보'; 
+->컴퓨터정보과 출력(이름,학과)	
+
+널값 확인여부(is null, is not null)
+select stu_no,stu_height from student where stu_weight is null;
+
+in(여러개 조건 값 중 하나만 만족하는 행처리할 경우)
+select stu_no,stu_name from student where stu_dept in("컴퓨터 정보,'기계);
+
+학번을 기준으로 (오름차순)으로 정렬
+select * from student order by stu_no;
+
+order by:정렬
+오름차순으로 정렬할 경우 생략가능
+내림차순으로 정렬할 경우 desc명시
+
+select * from student  order by stu_no desc;(내림차순)->높은 숫자부터 먼저나온다
+select stu_no,stu_weight as target from student order by target;
+select stu_no,stu_weight as target from student order by 2;
+->몸무게를 taget으로 별칭부여한뒤 오름차순
+
+select round(345.678),round(345.678,0),round(345.678,1),round(345.678,-1)from dual;
+346,346,345.7,350
+select trunc(123.456,2) from dual;
+123.45
+select mod(10,5)from dual;
+0(나머지가 0이기 때문에)
+select upper('korea') from dual;
+대문자로 변경하라
+select initcap('korea')from dual;
+첫글자만 대문자로 변경
+select concat('korea','japan')from dual;
+문자열 연결
+select substr('korea',2,3)from dual;
+2번째부터 3개 반환하겟다
+select * from student where stu_dept<>'전기전자';
+전기전자제외!
+
+select sysdate from dual;
+==>오늘날짜
+select sysdate-1 from dual;
+==>어제 날짜
+
+alter session set nls_date_format='mm-dd-yyyy';
+==>날짜형식 바꾸기
+select sysdate from dual;->07-27-2020
+
+select next_day(sysdate,2) from dual;
+==>2:월요일	3:화요일
+   다음 월요일
+<변환 함수>
+1.TO_NUMBER(문자->숫자데이터)
+2.TO_DATE(문자->날짜)
+3.TO_CHAR(숫자,날짜->문자)
+
+select stu_no,stu_height from student where stu_height is null;
+==>널값 찾기
+
+NVL(인수1,인수2)
+:인수 값이 null인지 체크하여 연산이 가능한 값으로 변환하여 반환하는 함수
+:인수 1이 널이면 인수2,널이 아니면 인수1을 반환
+
+select to_char(to_number(1234.5678),'9999.999') from dual;
+9:숫자 자리수
+
+NVL(인수1,인수2)
+
+NVL2 (인수1,인수2,인수3)
+인수1이 널 값이면 인수3반환
+인수1이 널값이 아니면 인수2실행
+
+NULLIF(인수1,인수2)
+:인수1과 인수2를 비교하여 값이 같으면 NULL 아니면 인수1반환
+select nvl(nullif('a','a'),'널')
+
+select substr('황두희이승철',2,3) from dual;
+학생의 이름 2글자만표현
+
+select max(enr_grade),min(enr_grade) from enrol;
+최대 최소값구하기
+
+select count(*),count(stu_height) from student;
+count(*):전체 레코드(튜플)의 수
+
+select sum(stu_weight),to char(avg(stu_weight),'9999.99') from student where stu_dept = '컴퓨터정보';
+
+<group by>
+:그룹별로 묶을 수있음
+select stu_dept,avg(stu_weight) from student group by stu_dept;
+
+<having 절>
+:그룹함수를 적용한 결과에 다시 조건을 부여할 때
+
+select lpad(stu_name,10,'&')
+from student;
+==>자릿수를 지정하고 빈공간을 특정문자로 채운다
+ex)&&&&옥한빛(한글은 2byte씩 먹는다)
+
+select lpad(stu_name,10,'&')
+from student;
+==>오른쪽부터 채운다
+
+SELECT
+stu_name,INSTR(stu_name,'김')
+FROM student
+;
+==>학생의 이름에 '김'몇번째 들어잇는지
+
+select student.stu_no,stu_name,stu_dept,enr_grade from student,enrol where student.stu_no = enrol.stu_no;
+==>join:상호 관련성을 갖는 두 개 이상의 테이블로부터 새로운 테이블을 생성ㅎ아는데 사용된다.
+*이퀴조인(EQUI) : where 절에서 '='연산자 사용
+
+<natural joion : 자연조인>
+select stu_no, stu_name, enr_grade from student natural join enrol;
+
+<join~using> 중복이 2개이상될때 사용
+select stu_no,stu_name,enr_grade from student join enrol using(stu_no)
+
+<non-equi조인>
+조인 조건에 '='외의 비교연산자를 사용한 조인
+select enr_grade,stu_name from enrol,student where enr_grade between 80 and 90;
+
+부속질의
+select stu_name from student where stu_height>(select stu_height from student where stu_name = '옥성우');
+옥성우보다 키큰사람 이름
+
+
+문제
+select sub_name, sub_prof from subject,student,enrol where student.stu_no = enrol.stu_no and subject.sub_no = enrol.sub_no and stu_name = '김인중';
+//위아래 같은말!
+select sub_name, sub_prof 
+from subject natural join enrol  natural join student
+where  stu_name = '김인중';
+
+
+삭제
+delete from a_enrol
+where stu_no = 20131001;
+
+delete from a_enrol;
+->테이블은 남아잇지만 데이터는 하나도 없다
+
+--VARCHAR2(N):가변길이 문자 데이터에 대한 정의
+--NUMBER(N,M):숫자 데이터에 대한 정의로 N은 자릿수,M은 소수이하 자리수
+--CHAR(N):문자 데이터에 대한 정의
+--DATE:날짜 데이터에 대한 정의
+--LONG:2GB의 가변길이 문자 데이터에 대한 정의
+
+기존의 학생 테일블 이용하여 새로운 테이블을 생성하고 싶다.
+create table t_student
+as select * from student
+where stu_dept ='기계'
+
+<테이블 변경>alter
+DDL:create,alter,drop
+DML:insert,update,delete
+DCL:rollback,commit
+
+alter table t_student
+add(army char(1));
+:기존 테이블에 새로운 열을 추가하는 작업(add)
+
+:기존 테이블에 열의 구조 변경(modify)
+alter table t_student
+modify(army number);
+
+:기존 테이블에 열을 삭제(drop)
+alter table t_student
+drop(army);
+
+<테이블 이름변경>
+rename t_student to test_student;
+
+<테이블내의 데이터 삭제>
+truncate table test_student;
+:test_student내의 모든 데이터를 삭제
+
+delete의 경우 트랜잭션을 종료해야만 최종데이터가 삭제되지만
+truncate의경우 auto commit이 발생하여 트랜잭션을 종료할 필요없다
+
+drop table test_student; -->테이블도 다 삭제
+
+select empno,ename,sal, case job when 'SALESMAN' then sal *1.1 when 'clerk' then sal*2.2 else sal end as 급여인상 from emp;
+select empno,ename,job,sal, decode(job,'SALESMAN', sal*1.1,'CLERK', sal*1.15,sal)as 인상급여 from emp;
+
+
+select empno,ename from emp where hiredate = to_date('1980-12-17','yy-mm-dd');
+--to_date : 날짜형태의 문자 ->날짜
+
+select count(*) from student;
+->전체 학생의 수
+
+select stu_no,stu_name stu_gender,stu_weight,
+case stu_gender when 'F' then stu_weight-5 when 'M' then stu_weight+5 else stu_weight end as 변경된몸무게 from student;
+
+집합연산자 : union, minus, insersect
+union: 두개 이상의 질의결과에서 중복행을 제거하고 결과반환
+create table a_stuendt as select * from student where stu_dept in('기계','전기전자'); -->테이블생성
+select * from a_student union select * from d_student;(union)->합집합
+select * from a_student intersect select * from d_student;(intersect)->공통되어지는 부분 추출
+select * from a_student minus select * from d_student;(minus)->차집합
+
+select add_months(hiredate,3) from emp;
+->입사일 기준으로 3달후
+
+select empno,ename,hiredate,trunc(sysdate-hiredate,0) from emp;
+->근무일수 알아내기
+
+<merge>
+merge into a_student a (데이터가 update, insert될 테이블명)
+	using student s (비교할 테이블)
+on(s.stu_no = a.stu_no) ->update, insert하게될 조건
+when matched then update set a.stu_weight = s.stu_weight
+when not matched then insert into values(s.stu_no,s.stu_name,s.stu_dept,null,null,null,null,stu_weight);
+
+TCL(Transaction Control Language)
+:사용자에 의해 실행된 SQL문의 집합을 의미
+변경된 데이터는TCL에 의해 데이터베이스에 반영되어야한다.
+(무결성=정확성을 유지하기 위해 필요)
+
+select NVL(to_char(mgr),'상급자 없음')from emp;
+->to_char 주의
+
+select ename,empno, sal+nvl(comm,0) from emp;
+-->comm을 포함한 금액 nvl주의
+
+select stu_grade,avg(stu_height) from student where stu_dept ='기계'    group by stu_grade having avg(stu_height)>=160;
+-->group by 와 having 절
+
+--45. 10, 20번부서 사원들 중 최고 급여를 받는 사원의 사원번호, 사원이름, 급여를검색하라. (부질의)
+select deptno, empno, ename, sal from emp where sal in(select max(sal) from emp group by deptno having  deptno in(10,20));
+-->부질의문제
+-->10,20(그룹핑의 조건)
+-->최고급여(조건)
+
+select count(ename) from emp;
+-->사원이름의 개수 추출
+
+pk_dept :제약조건
+<constraint 제약조건>
+:데이터베이스 상태가 항상 만족해야할 기본규칙
+1)도메인 제약조건
+2)키제약조건 : 테이블에서 각 튜플을  유일하게 식별할 수 있는 수단 (기본키)
+3)무결성제약조건 : 
+기본키에 있는 속성값들은 어떠한 경우에도 널 값을 가질 수 없다
+NOT NULL :열에 NULL 값 허용하지 않음
+UNIQUE KEY: 열 또는 열 조합이 유일성(유일한 값)을 가져야 함
+
+PRIMARY KEY: 열에 null 허용안됨,유일성을 가져야한다.
+(not null+unique)
+
+FOREIGN KEY : 다른테이블을 참조하는 튜플에 값이 있어야함.
+
+<제약조건 만들면서 테이블생성>
+ex)stu_no char(9), 
+stu_name varchar2(12),
+    constraint u_stu_name unique, //학생이름은 유일하다
+stu_dept varchar2(20)
+    constraint n_stu_dept not null,
+stu_grade number(1),
+stu_class char(1),
+stu_gender char(1),
+stu_height number(5,2),
+stu_weight number(5,2));
+
+ex)create table t_enrol(
+sub_no char(3) ,
+   
+stu_no char(9),
+     
+enr_grade number(3),
+    constraint p_enrol primary key(sub_no , stu_no));
+
+<제약조건삭제>
+alter table t_enrol
+drop constarint p_enrol cascade;    
+
+<제약조건의 활성화, 비활성화>
+alter table t_student
+disable constarint n_stu_dept; ==>비활성화
+
+alter table t_student
+able constarint n_stu_dept; ==>활성화
+
+as쓰고 안쓰고 차이
+as : 테이블생성시에(create)
+as 안쓰는 경우 : 테이블 삽입시에(insert)
+
+update하기
+update a_enrol
+set enr_grade = enr_grade+10;
+
+부질의로 update하기
+update a_enrol
+set enr_grade = enr_grade +10 
+where sub_no=(select sub_no from subject where sub_name = '데이터베이스');
+
+튜플삭제
+delete from a_enrol
+where stu_no = 20132003;
+
