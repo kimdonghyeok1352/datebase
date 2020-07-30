@@ -320,3 +320,103 @@ where sub_no=(select sub_no from subject where sub_name = '데이터베이스');
 delete from a_enrol
 where stu_no = 20132003;
 
+view : 데이터베잉스 내의 "가상 테이블"
+        사용자들에게는 데이터가 있는 테이블처럼 보이나
+        실제로는 데이터는 존재하지 않으며 사용할 때 데이터 
+        베이스 테이블로부터 유도되어 운영됨.
+뷰를 통해 사용자와 관련된 데이터만 제공하므로 원하는 데이터만을 조작할 수 
+있게 함으로서 보안 기능이 강화된다.
+
+view 만들기
+create or replace view v_student1
+as select * from student where stu_dept='컴퓨터정보';
+
+<조인뷰:2개 이상 테이블로부터 유도된 뷰>
+create or replace view v_enrol1
+as select sub_name,enrol.sub_no, stu_no,enr_grade
+from enrol,subject where enrol.sub_no = subject.sub_no;
+
+5.	enrol1테이블에서 subject1에 없는 과목번호를 999로 변경해라.
+update enrol1
+set sub_no = '999'
+where sub_no not in(select sub_no from subject1);
+
+7.	enrol1테이블에서 과목번호 999를 삭제하라
+delete from enrol
+where sub_no = '999';
+
+<Top-N 질의>
+최대,최소값을 가진 열의 데이터추출
+ex) 키가 큰 상위 5명학생
+    성적 높은 상위 5명학생
+select stu_no,stu_name,stu_height
+from (select stu_no,stu_name,stu_height from student
+        where stu_height is not null order by stu_height desc)
+where rownum<=5;   (상위 5명)
+=>학생테이블에서 키가 큰 상위 5명 학생의 학번,이름,키 검색하는 코드
+
+SEQUENCE문
+create sequence seq1
+increment by 2
+start with 100
+maxvalue 1000;
+==> 100 102 104 106.....1000
+
+sequence 확인법
+select seq1.nextval from dual;
+
+sequence삭제
+drop sequence seq1;
+
+테이블만들기
+ex)create table product(
+p_code char(3)
+constraint c_code primary key,
+p_name varchar2(30),
+p_cost number,
+p_group varchar2(30));
+
+저장 프로시저(Stored Procedure)
+:프로그래머가 생성해 놓은 쿼리문을 마치 하나의 메소드 형식으로 관리하는 것
+1.declare
+2.begin
+3.exception
+
+or replace:이미 같은 이름의 프로시저가 존재하는 경우 기존의 프로시저 내용을
+            지우고 새로운 내용으로 바꿔준다(덮어쓰기)
+
+create or replace procedure test2   
+(v_stu_no in student.stu_no%type,           --> v_stu_no에 내가 직접 쳐서 넣겠다.%type은 char,vachar나 이런형식 말하는듯?
+v_stu_grade in student.stu_grade%type)
+is
+
+begin                                   begin -->실행문
+    update student
+    set stu_grade=v_stu_grade
+    where stu_no=v_stu_no;
+end test2;
+/
+select * from student where stu_no=20153075;
+execute test2(20153075,3);
+-->학번,학년을 입력으로 해당 학생의 학년을 수정하는 프로시저
+
+
+    
+create or replace procedure test3
+(v_stu_no in student.stu_no%type,
+v_stu_name out student.stu_name%type)
+is
+
+begin                                            begin -->실행문
+    select stu_name
+    into v_stu_name
+    from student
+    where stu_no = v_stu_no;
+end test3;
+/
+
+variable d_stu_name varchar2(12);
+:변수선언
+
+execute test3(20153075,:d_stu_name);
+print d_stu_name;
