@@ -294,14 +294,15 @@ enr_grade number(3),
 
 <제약조건삭제>
 alter table t_enrol
-drop constarint p_enrol cascade;    
+drop constraint p_enrol cascade; 
+cascade : 연쇄적인 삭제 -> 위에도 싸그리 역할몬함   
 
 <제약조건의 활성화, 비활성화>
 alter table t_student
-disable constarint n_stu_dept; ==>비활성화
+disable constraint n_stu_dept; ==>비활성화
 
 alter table t_student
-able constarint n_stu_dept; ==>활성화
+enable constarint n_stu_dept; ==>활성화
 
 as쓰고 안쓰고 차이
 as : 테이블생성시에(create)
@@ -420,3 +421,94 @@ variable d_stu_name varchar2(12);
 
 execute test3(20153075,:d_stu_name);
 print d_stu_name;
+
+<외래키,주키>
+create table t_enrol(
+sub_no char(3),
+stu_no number(9),
+enr_grade number(3),
+constraint enr_sub_no_fk1 foreign key(sub_no)
+references subject(sub_no),
+constraint enr_stu_no_fk1 foreign key(stu_no)
+references subject(stu_no),
+constraint enr_pk1 primary key(sub_no,stu_no));
+
+<제약조건의 확인>
+select * 
+from user_constraints
+where table_name = 't_student';
+
+t_sal number(7,2), --> 의미 :
+
+create alter drop (행)
+updatee insert delete (튜플)
+
+alter table t_tbl
+add(t_gender char(1)); -->열 삽입
+
+alter table t_tbl
+modify(t_gender varchar2(10));-->열 구조 변경
+
+alter table t_tbl
+drop(t_gender);-->열제거
+
+truncate table t_tbl;-> 데이터 모두삭제
+
+create table t_emp2(
+t_empno number(4) NOT null,
+t_ename varchar2(40),
+t_job varchar2(9),
+t_mgr number(4) ,
+t_hiredate date,
+t_sal number(7,2),
+t_comm number(7,2),
+t_dept number(2)
+constraint t_emp2_fk references dept(deptno),
+constraint t_emp2_pk primary key(t_empno));
+-->기본키 외래키
+
+select * 
+from user_constraints
+where table_name = 'T_STUDENT';
+-->제약조건확인
+
+alter table t_emp2
+disable constraint t_emp2_fk;
+-->제약조건 비활성화
+
+alter table t_emp2
+enable constraint t_emp2_fk;
+-->제약조건 활성화
+
+alter table t_emp2
+drop constraint t_emp2_fk;
+-->제약조건 삭제
+
+create or replace view v_emp_dept
+as select empno,ename,dname from emp,dept 
+where emp.deptno = dept.deptno;
+-->조인뷰
+
+<top -N 질의>
+select ename,hiredate from (select ename,hiredate from emp where hiredate is not null order by hiredate)
+where rownum<=5;
+
+입력 in
+검색 out
+
+
+※프로시저
+create or REPLACE PROCEDURE test7
+(v_empno in emp.empno%type,
+v_deptno in emp.deptno%type)
+is
+begin
+update emp
+set deptno = v_deptno
+where empno=v_empno;
+end test7;
+/
+
+EXECUTE test7(7788,10);
+select * from emp;
+
