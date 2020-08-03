@@ -214,7 +214,7 @@ select count(*) from student;
 select stu_no,stu_name stu_gender,stu_weight,
 case stu_gender when 'F' then stu_weight-5 when 'M' then stu_weight+5 else stu_weight end as 변경된몸무게 from student;
 
-집합연산자 : union, minus, insersect
+집합연산자 : union, minus, intersect
 union: 두개 이상의 질의결과에서 중복행을 제거하고 결과반환
 create table a_stuendt as select * from student where stu_dept in('기계','전기전자'); -->테이블생성
 select * from a_student union select * from d_student;(union)->합집합
@@ -655,5 +655,93 @@ cursor 커서명
 3.커서에서 데이터 추출(fetch)
 4.커서종료(close)
 is절에서 1번시행(커서선언)
-begin절엥서 2,3번시시행->반복문
+begin절에서 2,3번시시행->반복문
 
+-----------------------------문제--------------
+set serveroutput on
+create or replace procedure test10
+(p_stu_no in student.stu_no%type)
+is
+p_stu_name  student.stu_name%type;
+begin
+select stu_name into p_stu_name from student where stu_no = p_stu_no;
+dbms_output.put_line(p_stu_name);
+exception
+when no_data_found then dbms_output.put_line('데이터가 없다');
+end test10;
+/
+execute test10(20113089);
+-------------------------------------------------
+<커서>
+set serveroutput on
+create or replace procedure aa1
+is
+p_nerol enrol%rowtype;-->이걸 적으면 밑에 3줄을 적을 필요가 없다(단 다 같은 테이블에 있을때)
+p_stu_no  enrol.stu_no%type;
+p_sub_no  enrol.sub_no%type;
+p_enr_grade  enrol.enr_grade%type;
+
+cursor p_cursor is select stu_no,sub_no,enr_grade from enrol where sub_no = 101;
+-->커서선언:과목번호가 101번인 데이터중에 학번,과목번호,점수를 뽑아 t_cusor에 넣어주는 코드
+begin   
+        open p_cursor;  //커서오픈
+        loop    
+            fetch p_cursor into p_stu_no,p_sub_no,p_enr_grade;
+            exit when p_cursor%notfound;
+            dbms_output.put_line(p_stu_no||' '||p_sub_no)
+        end loop;
+        close p_cursor;
+end aa1;
+/ 
+execute aa1;   
+----------------------------------------------------    
+<trigger>
+:DB를 이용하면서 어떤 조건에 맞는 이벤트가 일어나는지를 감시하다 조건에 맞으면
+후속 이벤트를 발생시킴
+before / after 
+
+create table tmp_tbl1
+(userid varchar2(10),
+workdate date,
+bigo char(1));
+-------------------------테이블생성
+create or replace trigger tri1
+    after update -->어떤 값이 update될때
+    on student -->student테이블에서
+    for each row 
+    begin insert into tmp_tbl1 values(user,sysdate,'u');
+    
+-------------------------------------------
+문제:과목번호 입력하면 교수명을 반환하는 함수
+실행)
+variable x varchar2(10);
+
+execute :x := f_prof_return(999);
+
+과목번호 없다
+
+
+execute :x := f_prof_return(107);
+
+구봉규
+
+create or REPLACE FUNCTION dd1
+(v_sub_no in subject.sub_no%TYPE)
+return subject.sub_prof%TYPE 
+is 
+v_sub_prof subject.sub_prof%TYPE;
+begin
+select sub_prof into v_sub_prof from subject
+where v_sub_no=sub_no;
+return v_sub_prof;
+end dd1;
+/
+select distinct dd1(107) from subject;
+-----------------------------------------------
+<PL/SQL블록의 처리중 자주 발생하는 에러>
+1.no_data_found
+->검색문 사용 후 결과가 있는지 여부 판단
+2.not_logged_on
+->데이터베이스에 연결 상태 판단
+3.too_many rows
+->select 문에 into절을 사용한 경우 select 절의 결과가 복수행일경우
