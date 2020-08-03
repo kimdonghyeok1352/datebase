@@ -565,7 +565,7 @@ begin
             v_sum:=v_sum+v_cnt;
             dbms_output.put_line(v_cnt||''||v_sum)
             exit when v_cnt = 10;
-        end loof;
+        end loop;
 end;
 /        
 
@@ -599,3 +599,61 @@ end;
 
 <SP>
 create of replace procedure test
+
+
+학생의 점수를 임의 점수만큼 올려줌
+그 결과를 출력
+
+create or replace function test6
+(v_stu_no in number)
+return number
+is
+v_no number;
+
+문제: 최고 급여를 받는 사원이름 출력하는 함수
+create or replace function prop
+    return emp.ename%type
+is
+    v_ename in emp.ename%type
+begin
+    select ename into v_ename from emp
+    where sal = (select max(sal) from emp );
+    return v_ename;
+end prop;
+/            
+
+select distinct prop()
+from emp;
+----------------------------------
+create or replace procedure vv1
+(v_empno in emp.empno%type,
+v_job in emp.job%type)
+is
+begin
+update emp
+set emp.job = v_job
+where emp.empno = v_empno;
+end vv1;
+/
+SELECT
+    *
+FROM emp;
+execute vv1(22222,'고고');
+----------------------------
+
+
+<커서와 fetch>
+:PL/SQL에서 select 문을 이용한 검색을 했을 때, 결과가 한 행인 경우가 있고,
+복수 행인 경우가 있다.검색 결과가 복수행일 경우 into절을 이용할 수 없기 때문에
+cuosor 와 fetch가 있다.
+:쿼리문에 의해 반환되는 결과값들을 저장하는 메모리 공간이 커서이다.
+->결과가 복수행이기 때문에 반복적으로 데이터 행을 읽는 과정이 필요
+커서 처리단계
+1.명시적 커서 선언
+cursor 커서명
+2.커서 오픈(open)
+3.커서에서 데이터 추출(fetch)
+4.커서종료(close)
+is절에서 1번시행(커서선언)
+begin절엥서 2,3번시시행->반복문
+
