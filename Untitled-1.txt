@@ -512,3 +512,90 @@ end test7;
 EXECUTE test7(7788,10);
 select * from emp;
 
+PL/SQL문의
+:오라클에서 제공하는 프로그래밍 언어
+:일반 프로그래밍 요소 다 가지고 있고, DB업무처리하기 위한 최적화된 언어
+
+declare(선언부):변수,상수,커서
+begin(실행부):SQL에 선택, 반복처리등
+end:
+/
+SP(Stored Procedure : 저장 프로시저)
+:서버에 저장해 놓고 주기적으로 반복해서 사용
+
+set serveroutput on
+:PL/SQL의 표준 출력문
+
+(조건문)
+set serveroutput on
+declare
+v_num number:=1; (1대입이라는 뜻)
+begin
+        if v_num = 1 then
+            dbms_output.put_line('DB');
+        end if;
+end;
+/   
+
+set serveroutput on
+declare
+v_num number:=1; 
+begin
+        if v_num = 1 then
+            dbms_output.put_line('DB');
+        else
+            dbms_output.put_line('c');
+        end if;    
+end;    
+/
+
+(반복처리문)
+1.loop~end loop
+2.for~loop
+3.while~loop
+
+1. loop~end loop
+set serveroutput on
+declare 
+v_cnt number:=0;
+v_sum number:=0; -->초기식
+begin
+        loop
+            v_cnt:=v_cnt+1;(1씩 증가)
+            v_sum:=v_sum+v_cnt;
+            dbms_output.put_line(v_cnt||''||v_sum)
+            exit when v_cnt = 10;
+        end loof;
+end;
+/        
+
+2.
+set serveroutput on
+declare 
+v_cnt number:=0;
+v_sum number:=0; 
+begin
+        for
+            v_cnt in 1..10 loop (v_cnt는 1부터 10까지다의미)
+            v_sum:=v_sum+v_cnt;
+            dbms_output.put_line(v_cnt||' '||v_sum);
+            
+        end loop;
+end;
+
+3. while문(잘안쓰임)
+set serveroutput on
+declare 
+v_cnt number:=0;
+v_sum number:=0; 
+begin
+        while v_cnt <= 9 loop
+            v_cnt := v_cnt +1;
+            v_sum:=v_sum+v_cnt;
+            dbms_output.put_line(v_cnt||' '||v_sum);
+            
+        end loop;
+end;
+
+<SP>
+create of replace procedure test
