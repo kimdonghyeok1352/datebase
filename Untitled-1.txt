@@ -274,7 +274,7 @@ FOREIGN KEY : 다른테이블을 참조하는 튜플에 값이 있어야함.
 
 <제약조건 만들면서 테이블생성>
 ex)stu_no char(9), 
-stu_name varchar2(12),
+stu_name varchar2(12)
     constraint u_stu_name unique, //학생이름은 유일하다
 stu_dept varchar2(20)
     constraint n_stu_dept not null,
@@ -473,11 +473,11 @@ where table_name = 'T_STUDENT';
 -->제약조건확인
 
 alter table t_emp2
-disable constraint t_emp2_fk;
+disable constraints t_emp2_fk;
 -->제약조건 비활성화
 
 alter table t_emp2
-enable constraint t_emp2_fk;
+enable constraints t_emp2_fk;
 -->제약조건 활성화
 
 alter table t_emp2
@@ -490,7 +490,8 @@ where emp.deptno = dept.deptno;
 -->조인뷰
 
 <top -N 질의>
-select ename,hiredate from (select ename,hiredate from emp where hiredate is not null order by hiredate)
+select ename,hiredate 
+from (select ename,hiredate from emp where hiredate is not null order by hiredate)
 where rownum<=5;
 
 입력 in
@@ -676,7 +677,7 @@ execute test10(20113089);
 set serveroutput on
 create or replace procedure aa1
 is
-p_nerol enrol%rowtype;-->이걸 적으면 밑에 3줄을 적을 필요가 없다(단 다 같은 테이블에 있을때)
+p_enrol enrol%rowtype;-->이걸 적으면 밑에 3줄을 적을 필요가 없다(단 다 같은 테이블에 있을때)
 p_stu_no  enrol.stu_no%type;
 p_sub_no  enrol.sub_no%type;
 p_enr_grade  enrol.enr_grade%type;
@@ -688,7 +689,7 @@ begin
         loop    
             fetch p_cursor into p_stu_no,p_sub_no,p_enr_grade;
             exit when p_cursor%notfound;
-            dbms_output.put_line(p_stu_no||' '||p_sub_no)
+            dbms_output.put_line(p_stu_no||' '||p_sub_no);
         end loop;
         close p_cursor;
 end aa1;
@@ -744,4 +745,113 @@ select distinct dd1(107) from subject;
 2.not_logged_on
 ->데이터베이스에 연결 상태 판단
 3.too_many rows
-->select 문에 into절을 사용한 경우 select 절의 결과가 복수행일경우!
+->select 문에 into절을 사용한 경우 select 절의 결과가 복수행일경우
+-------------------------------------------------
+declare 문제
+set SERVEROUTPUT on 
+declare
+v_no emp.empno%type;
+v_name emp.ename%type;
+v_sal emp.sal%type;
+begin
+select empno,ename,sal into v_no, v_name,v_sal from emp3 where empno = 7839;
+DBMS_OUTPUT.PUT_line(v_no||''||v_name||''||v_sal);
+end;
+/
+-----------------------------------------------------
+declare if 문제
+set serveroutput on
+declare
+v_no emp.empno%type;
+v_name emp.ename%type;
+v_deptno emp.deptno%type;
+v_dname varchar2(20);
+
+begin
+select empno,ename,deptno
+into v_no,v_name,v_deptno
+from emp
+where empno=7566;
+
+if(v_deptno=10) then v_dname:='관리부';
+elsif(v_deptno=20) then v_dname:='마케팅부';
+elsif(v_deptno=30) then v_dname:='IT개발부';
+end if;
+
+dbms_output.put_line(v_no||' '||v_dname);
+end;
+/
+------------------------------------------------------
+예외 문제
+create or replace PROCEDURE pro1
+(v_empno in emp.empno%type)
+
+is
+v_ename emp.ename%type;
+begin
+ select ename into v_ename from emp where v_empno = empno;
+ 
+exception
+when no_data_found then
+dbms.output.put_line('없다');
+
+end pro1;
+/
+execute pro1(11);
+-----------------------------------------------------
+<커서문제>
+set serveroutput on
+create or replace procedure pro8
+is
+v_empno emp.empno%type;
+v_ename emp.ename%type;
+v_dname dept.dname%type;
+cursor result is select empno,ename,dname from emp natural join dept where sal>=2000 order by dname;
+begin
+    open result;
+    loop
+        fetch result into v_empno,v_ename,v_dname;
+        exit when result%notfound;
+        DBMS_OUTPUT.PUT_line(v_empno||''||v_ename||''||v_dname);
+    end loop;
+    close result;
+end pro8;
+/
+execute pro8;
+------------------------------------------------------
+<예외던지기>
+set serveroutput on
+create or replace procedure test11
+(v_sub_no  in enrol.sub_no%type)
+is
+v_cnt number;
+cnt_error exception;
+begin
+select count(stu_no) into v_cnt from enrol where sub_no = v_sub_no
+dbms_output.put_line(v_sub_no||'과목 수강자는'||v_cnt||'명');
+
+if v_cnt=0 then
+raise cnt_error;//예외던지기(예외를 일부러 발생)
+end if;
+
+exception 
+when cnt_error then 
+DBMS_OUTPUT.put_line('없다');
+end test11;
+/
+execute test11(10);
+----------------------------------------------------------
+<트리거문제> 시스계정아닐때 사용가능
+create table dept_del(
+userid varchar2(10),
+workdate date,
+deptno number(2),
+dname varchar2(14),
+loc varchar2(13));
+create or replace trigger dept_tri
+after delete 
+on dept 
+begin 
+insert into dept_del(userid,workdate,deptno,dname,loc) values(user,systdate,:old.deptno,:old.dname,:old.loc);
+end dept_tri;
+/
