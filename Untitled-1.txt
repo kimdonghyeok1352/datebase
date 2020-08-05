@@ -855,3 +855,37 @@ begin
 insert into dept_del(userid,workdate,deptno,dname,loc) values(user,systdate,:old.deptno,:old.dname,:old.loc);
 end dept_tri;
 /
+----------------------------------------------
+<복습>-시험나올수도?
+select * from emp where hiredate = to_date('2020-08-05','yyyy-mm-dd');
+select stu_dept,max(stu_height) from student group by stu_dept having max(stu_height)>=170;
+학과별 학생들의 학생수를 학생수가 많은 순으로 검색
+select stu_dept,count(*) from student  group by stu_dept order by 2;
++테이블생성,제약조건
+-------------------------------------------------
+<case-when>
+select stu_name,stu_height,
+case stu_grade 
+when 1 then stu_height+5 
+when 2 then stu_height +10 
+when 3 then stu_height+15 
+else stu_height  
+end
+from student;
+-------------------------------------------------
+<top n 질의>
+select c_name,c_addr from (select c_name,c_addr from cust2 natural join rent2  order by r_date desc) 
+where rownum<=4;
+------------------------------------------------
+<프로시저문제>
+create or replace procedure pro2
+(p_c_no in cust2.c_no%type,
+p_c_name in cust2.c_name%type)
+is
+begin
+update cust2
+set  c_name = p_c_name
+where c_no = p_c_no;
+end pro2;
+/
+execute pro2(103,'이철수');
